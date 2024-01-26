@@ -125,8 +125,10 @@ gen_data = normal_sampler.sample(
     num_samples=16
 )
 
-pu = PlottingUtils(trained_model, viz_size=4, data = next(iter(eval_loader))['data'].to(device))
+pu = PlottingUtils(trained_model, viz_size=2, data = next(iter(eval_loader))['data'].to(device))
 pu.generated_from_samples(gen_data)
-pu.original()
-pu.reconstructed()
+pu.original("height")
+pu.original('img')
+pu.reconstructed("height")
+pu.reconstructed('img')
 pu.show()

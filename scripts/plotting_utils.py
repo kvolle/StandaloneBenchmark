@@ -10,6 +10,9 @@ class PlottingUtils():
         self.viz_size = viz_size
         self.data = data
         self.labels = labels
+        self.gray_weights = np.array([0.299, 0.587, 0.114])#.reshape((1, 3))
+        idx = np.arange(64)
+        self.X, self.Y = np.meshgrid(idx, idx)
         if normalization_used is None:
             self.mean = [0., 0., 0.]
             self.std  = [1., 1., 1.]
@@ -106,6 +109,16 @@ class PlottingUtils():
                 axes[i][j].set_xlim((0., 1.))
         plt.tight_layout(pad=0.)
 
+    def grid_gray_heights(self, axes, data):
+        data = data.clone().detach().cpu().numpy()
+        for i in range(self.viz_size):
+            for j in range(self.viz_size):
+                data_ = np.moveaxis(data[i*self.viz_size + j, :, :, :],0, -1)
+                data_ = np.inner(data_, self.gray_weights)
+                axes[i][j].plot_surface(self.X, self.Y, np.transpose(data_), cmap='viridis', linewidth=0)
+                axes[i][j].axis('off')
+        plt.tight_layout(pad=0.)
+
     def generated_from_samples(self, gen_data, hist = False):
         # show results with normal sampler
         fig, axes = plt.subplots(nrows=self.viz_size, ncols=self.viz_size, figsize=(10, 10))
@@ -115,26 +128,40 @@ class PlottingUtils():
         else:
             self.grid_images(axes, gen_data)
 
-    def reconstructed(self, hist = False):
+    def reconstructed(self, plot_type = "img"):
         reconstructions = self.trained_model.reconstruct(self.data[:self.viz_size**2]).detach().cpu()
         # show reconstructions
         fig, axes = plt.subplots(nrows=self.viz_size, ncols=self.viz_size, figsize=(10, 10))
         fig.canvas.manager.set_window_title('Reconstructions')
 
-        if hist:
+        if plot_type == "hist":
             self.grid_hists(axes, reconstructions)
-        else:
+        elif plot_type == "height":
+            plt.close(fig)
+            fig, axes = plt.subplots(nrows=self.viz_size, ncols=self.viz_size, figsize=(10, 10), subplot_kw={'projection':'3d'})
+            fig.canvas.manager.set_window_title('Reconstructions')
+            self.grid_gray_heights(axes, reconstructions)
+        elif plot_type == "img":
             self.grid_images(axes, reconstructions)
+        else:
+            print("Plot type not recognized")
 
-    def original(self, hist = False):
+    def original(self, plot_type = "img"):
         # show reconstructions
         fig, axes = plt.subplots(nrows=self.viz_size, ncols=self.viz_size, figsize=(10, 10))
         fig.canvas.manager.set_window_title('Original Images')
 
-        if hist:
+        if plot_type == "hist":
             self.grid_hists(axes, self.data)
-        else:
+        elif plot_type == "height":
+            plt.close(fig)
+            fig, axes = plt.subplots(nrows=self.viz_size, ncols=self.viz_size, figsize=(10, 10), subplot_kw={'projection':'3d'})
+            fig.canvas.manager.set_window_title('Original Images')
+            self.grid_gray_heights(axes, self.data)
+        elif plot_type == "img":
             self.grid_images(axes, self.data)
+        else:
+            print("Plot type not recognized")
 
     def interpolations(self):
         # Visualizing Interpolations
