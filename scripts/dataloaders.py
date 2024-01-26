@@ -306,6 +306,7 @@ def get_PetExpression_loader(data_dir,
     dataset = PetDataset(data_dir, transform=transform)
 
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=pin_memory)
+    return data_loader
 
 
 class PetDataset(Dataset):
