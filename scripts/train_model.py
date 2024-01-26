@@ -51,16 +51,16 @@ if DATA == 'CelebA':
     train_loader = get_CelebA_loader(data_root + "train.txt", BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment = True, shuffle = True, num_workers = 1, pin_memory = True) # Shape (C, H, W)
     eval_loader = get_CelebA_loader(data_root + "eval.txt", BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment = False, shuffle = True, num_workers = 1, pin_memory = True)
     test_loader = get_CelebA_loader(data_root + "test.txt", BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment = False, shuffle = True, num_workers = 1, pin_memory = True)
-elif DATA == 'PetExpression'
+elif DATA == 'PetExpression':
     data_root = "./data/PetExpression/Master Folder/"
     train_loader = get_PetExpression_loader(data_root+'train/', batch_size=BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment=True, shuffle=True, num_workers=1, pin_memory=True)
     eval_loader = get_PetExpression_loader(data_root+'test/', batch_size=BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment=False, shuffle=False, num_workers=1, pin_memory=True)
-elif DATA = 'Cifar':
+elif DATA == 'Cifar':
     data_root = "./data/cifar/cifar10-64/"
     train_loader = get_PetExpression_loader(data_root+'train/', batch_size=BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment=True, shuffle=True, num_workers=1, pin_memory=True)
     eval_loader = get_PetExpression_loader(data_root+'test/', batch_size=BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment=False, shuffle=False, num_workers=1, pin_memory=True)
 elif DATA == 'AltPet':
-    data_root = './data/Altpets/'
+    data_root = './data/AltPets/'
     train_loader = get_AltPet_loader(data_root + "train_filenames.txt", BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment = True, shuffle = True, num_workers = 1, pin_memory = True) # Shape (C, H, W)
     eval_loader = get_AltPet_loader(data_root + "valid_filenames.txt", BATCH_SIZE, shape = (NC, IMG_H, IMG_W), augment = False, shuffle = True, num_workers = 1, pin_memory = True)
     test_loader = get_AltPet_loader(data_root + "test_filenames.txt", BATCH_SIZE_TEST, shape = (NC, IMG_H, IMG_W), augment = False, shuffle = True, num_workers = 1, pin_memory = True)
