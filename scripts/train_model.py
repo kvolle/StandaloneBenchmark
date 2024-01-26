@@ -33,6 +33,9 @@ from plotting_utils import PlottingUtils
 
 from dataloaders import get_CelebA_loader, get_PetExpression_loader, get_AltPet_loader
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 BATCH_SIZE = 32
 BATCH_SIZE_TEST = 32
 NC = 3 # 1 # 
@@ -98,6 +101,8 @@ model = VAE(
     encoder=Encoder_VAE(model_config),
     decoder=Decoder_AE(model_config),
 )
+
+print(count_parameters(model))
 
 # Build the Pipeline
 pipeline = TrainingPipeline(
