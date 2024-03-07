@@ -11,7 +11,7 @@ class PlottingUtils():
         self.data = data
         self.labels = labels
         self.gray_weights = np.array([0.299, 0.587, 0.114])#.reshape((1, 3))
-        idx = np.arange(64)
+        idx = np.arange(128) # 64) # 
         self.X, self.Y = np.meshgrid(idx, idx)
         if normalization_used is None:
             self.mean = [0., 0., 0.]
