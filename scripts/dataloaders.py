@@ -291,15 +291,17 @@ def get_PetExpression_loader(data_dir,
     
     if augment:
         transform =     transforms.Compose([
-            transforms.Resize((IMG_H, IMG_W)),
+            transforms.Resize((IMG_H, IMG_W), antialias=None),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
+            transforms.Resize((IMG_H*2, IMG_W*2), antialias=None),
             normalize
         ])
     else:
         transform = transforms.Compose([
-            transforms.Resize((IMG_H, IMG_W)),
+            transforms.Resize((IMG_H, IMG_W), antialias=None),
             transforms.ToTensor(),
+            transforms.Resize((IMG_H*2, IMG_W*2), antialias=None),
             normalize
         ])
 
