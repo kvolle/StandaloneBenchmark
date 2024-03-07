@@ -40,7 +40,7 @@ BATCH_SIZE = 32
 BATCH_SIZE_TEST = 32
 NC = 3 # 1 # 
 IMG_H = IMG_W = 64
-EPOCHS = 1
+EPOCHS = 2500
 DATA = 'Cifar'
 
 #set up working data location
@@ -80,19 +80,20 @@ config = BaseTrainerConfig(
     learning_rate=0.0005,#5e-4,
     #scheduler_cls='CosineAnnealingLR',
     #scheduler_params={'T_max': EPOCHS, 'eta_min':1e-8},
-    scheduler_cls='CosineAnnealingWarmRestarts',
-    scheduler_params={'T_0': 50, 'eta_min':1e-6},
-    #scheduler_cls='CyclicLR',
-    #scheduler_params={'base_lr':1e-5, 'max_lr':0.001, 'mode':'triangular2','cycle_momentum':False},
+    #scheduler_cls='CosineAnnealingWarmRestarts',
+    #scheduler_params={'T_0': 50, 'eta_min':1e-6},
+    scheduler_cls='CyclicLR',
+    scheduler_params={'base_lr':1e-5, 'max_lr':0.001, 'mode':'triangular2','cycle_momentum':False},
     per_device_train_batch_size=BATCH_SIZE,
     per_device_eval_batch_size=BATCH_SIZE_TEST,
     num_epochs=EPOCHS,
-    no_cuda=False
+    no_cuda=False,
+    steps_saving=125
 )
 
 model_config = VAEConfig(
     input_dim=(NC, IMG_H, IMG_W),
-    latent_dim=128,
+    latent_dim=512,
     reconstruction_loss="mse"
 )
 # Build the model
@@ -130,7 +131,7 @@ gen_data = normal_sampler.sample(
     num_samples=16
 )
 
-pu = PlottingUtils(trained_model, viz_size=2, data = next(iter(eval_loader))['data'].to(device))
+pu = PlottingUtils(trained_model, viz_size=4, data = next(iter(eval_loader))['data'].to(device))
 pu.generated_from_samples(gen_data)
 pu.original("height")
 pu.original('img')
