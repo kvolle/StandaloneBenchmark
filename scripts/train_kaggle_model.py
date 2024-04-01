@@ -33,9 +33,9 @@ def count_parameters(model):
 BATCH_SIZE = 32
 BATCH_SIZE_TEST = 32
 NC = 3 # 1 # 
-IMG_H = IMG_W = 64
-EPOCHS = 50
-DATA = 'Cifar'
+IMG_H = IMG_W = 128
+EPOCHS = 150
+DATA = 'AltPet'
 
 #set up working data location
 working_root = './'
@@ -71,7 +71,7 @@ eval_loader = eval_loader
 
 config = BaseTrainerConfig(
     output_dir='./checkpoints/my_plain_vae_model',
-    learning_rate=0.0005,#5e-4,
+    learning_rate=0.001,#5e-4,
     #scheduler_cls='CosineAnnealingLR',
     #scheduler_params={'T_max': EPOCHS, 'eta_min':1e-8},
     #scheduler_cls='CosineAnnealingWarmRestarts',
