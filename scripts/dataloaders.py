@@ -12,6 +12,8 @@ from torch.utils.data import DataLoader, Subset, Dataset
 import cv2
 from PIL import Image, ImageFile
 
+import os
+
 OUT_SIZE = 224
 
 
@@ -192,7 +194,6 @@ def get_AltPet_loader(data_dir,
             #transforms.GaussianBlur(1),
             transforms.ToTensor(),
             squarecrop,
-            #transforms.Grayscale(),
             #normalize,
             transforms.RandomHorizontalFlip(),
         ])
@@ -221,7 +222,8 @@ class AltPetDataset(Dataset):
         f.close()
         self.num_samples = len(self.names)
         #ImageFile.LOAD_TRUNCATED_IMAGES=True
-        f = open('./data/AltPets/folder_names.txt', 'r')
+        self.directory_path = os.path.dirname(names_file)
+        f = open(self.directory_path + '/folder_names.txt', 'r')
         breeds = f.read().splitlines()
         f.close()
         self.label_from_breed = {}
@@ -235,11 +237,9 @@ class AltPetDataset(Dataset):
 
     def __getitem__(self, index):
         filename = self.names[index]
-        split_strings = filename.split('/')
-        breed = split_strings[1]
-        filename = './data/AltPets/' + breed + '/' + split_strings[-1]
-        image = cv2.imread(filename, self.read_mode)
-        
+        breed = filename.split('/')[-2]#[1]
+        image = cv2.imread(self.directory_path + filename[1:], self.read_mode)
+
         #parts = filename.split("/")
         #result = "/" + parts[-2] + "/" + parts[-1]
         #image=cv2.imread("../../data/AltPets" + result,0)
