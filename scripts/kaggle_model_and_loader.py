@@ -38,8 +38,8 @@ config = {'lr':1e-3,
           'wd':1e-2,
           'bs':256,
           'channels':3,
-          'img_size':128,
-          'epochs':150,
+          'img_size':32,
+          'epochs':15,
           'seed':1000}
 
 IMAGENET_ROOT = '../StandaloneBenchmark/data/TinyImageNet/'
@@ -52,6 +52,7 @@ ITALIAN_ANIMALS_ROOT = '../../Misc/Datasets/Animals-10/raw-img/'
 ANIMAL_FACE_ROOT = '../StandaloneBenchmark/data/afhq/'
 IMAGENET_R_ROOT = '../../Misc/Datasets/imagenet-r/'
 VANGOGH_ROOT = '../../Misc/Datasets/VanGogh/VincentVanGogh/'
+HASY_ROOT = '../../Misc/Datasets/HASY/hasy-data/'
 
 def delocalize(filenames):
     f = open(filenames, 'r')
@@ -88,8 +89,8 @@ valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
 #train_paths = np.random.choice(glob.glob(MARINE_ROOT + '*/*.jpg'),10000)
 #valid_paths = np.random.choice(glob.glob(MARINE_ROOT + '*/*.jpg'),1000)
 
-#train_paths = np.random.choice(glob.glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),10000)
-#valid_paths = np.random.choice(glob.glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),1000)
+#train_paths = np.random.choice(glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),10000)
+#valid_paths = np.random.choice(glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),1000)
 
 #train_paths = np.random.choice(glob.glob(ANIMAL_FACE_ROOT + 'train/*/*.jpg'),10000)
 #valid_paths = np.random.choice(glob.glob(ANIMAL_FACE_ROOT + 'val/*/*.jpg'),1500)
@@ -100,8 +101,11 @@ valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
 #train_paths = np.random.choice(glob.glob(VANGOGH_ROOT + '**/*.jpg'),1000)
 #valid_paths = np.random.choice(glob.glob(VANGOGH_ROOT + '**/*.jpg'),200)
 
-IMG_MEAN = [0.485, 0.456, 0.406] # [0.0, 0.0, 0.0] # 
-IMG_STD = [0.229, 0.224, 0.225] # [1.0, 1.0, 1.0] # 
+train_paths = np.random.choice(glob(HASY_ROOT+'*.png'),10000)
+train_paths = np.random.choice(glob(HASY_ROOT+'*.png'),1000)
+
+IMG_MEAN = [0.0, 0.0, 0.0] # [0.485, 0.456, 0.406] # 
+IMG_STD = [1.0, 1.0, 1.0] # [0.229, 0.224, 0.225] # 
 
 normalization = {'mean':IMG_MEAN, 'std':IMG_STD}
 
