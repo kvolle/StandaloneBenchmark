@@ -242,10 +242,10 @@ class Decoder(BaseDecoder):
         self.nc = config['channels']
         self.shape = 32
         self.fc2 = nn.Linear(self.latent_dim,(self.shape**2) *32)
-        self.conv3 = nn.ConvTranspose2d(32,64,kernel_size=2,stride=2)
-        self.conv4 = nn.ConvTranspose2d(64,32,kernel_size=2,stride=2)
-        self.conv5 = nn.ConvTranspose2d(32,3,kernel_size=1,stride=1)
-
+        self.conv3 = nn.Conv2d(32,64,kernel_size=3,stride=1, padding=1)
+        self.conv4 = nn.Conv2d(64,32,kernel_size=3,stride=1, padding=1)
+        self.conv5 = nn.Conv2d(32,3,kernel_size=1,stride=1)
+        self.upsample = nn.UpsamplingBilinear2d(scale_factor=2)
         self.leakyrelu = nn.LeakyReLU(0.2)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
@@ -255,8 +255,8 @@ class Decoder(BaseDecoder):
         #out = self.dec(z).reshape((z.shape[0],) + self.input_dim)  # reshape data
         h1 = self.activation(self.fc2(z))
         h1 = h1.view(-1, self.shape, self.shape, self.shape)
-        h2 = self.activation(self.conv3(h1))
-        h3 = self.activation(self.conv4(h2))
+        h2 = self.activation(self.conv3(self.upsample(h1)))
+        h3 = self.activation(self.conv4(self.upsample(h2)))
         h4 = self.conv5(h3)
         return ModelOutput(
             reconstruction=h4
