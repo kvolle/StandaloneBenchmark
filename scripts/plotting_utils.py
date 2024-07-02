@@ -11,7 +11,7 @@ class PlottingUtils():
         self.data = data
         self.labels = labels
         self.gray_weights = np.array([0.299, 0.587, 0.114])#.reshape((1, 3))
-        idx = np.arange(128) # 64) # 
+        idx = np.arange(data.shape[-1]) # 64) # 
         self.X, self.Y = np.meshgrid(idx, idx)
         if normalization_used is None:
             self.mean = [0., 0., 0.]
@@ -114,7 +114,11 @@ class PlottingUtils():
         for i in range(self.viz_size):
             for j in range(self.viz_size):
                 data_ = np.moveaxis(data[i*self.viz_size + j, :, :, :],0, -1)
-                data_ = np.inner(data_, self.gray_weights)
+                _,_,c = data_.shape
+                if c == 3:
+                    data_ = np.inner(data_, self.gray_weights)
+                else:
+                    data_ = np.squeeze(data_)
                 axes[i][j].plot_surface(self.X, self.Y, np.transpose(data_), cmap='viridis', linewidth=0)
                 axes[i][j].axis('off')
         plt.tight_layout(pad=0.)
