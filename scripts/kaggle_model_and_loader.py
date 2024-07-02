@@ -77,8 +77,8 @@ def celeb_names(split):
 #train_paths = np.random.choice(glob.glob(CIFAR_ROOT + 'train/**/*.png'),10000)
 #valid_paths = np.random.choice(glob.glob(CIFAR_ROOT + 'test/**/*.png'),1000)
 
-train_paths = delocalize(ALTPET_ROOT + 'train_filenames.txt')
-valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
+#train_paths = delocalize(ALTPET_ROOT + 'train_filenames.txt')
+#valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
 
 #train_paths = np.random.choice(celeb_names('train'), 10000)
 #valid_paths = np.random.choice(celeb_names('test'), 1500)
@@ -102,7 +102,7 @@ valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
 #valid_paths = np.random.choice(glob.glob(VANGOGH_ROOT + '**/*.jpg'),200)
 
 train_paths = np.random.choice(glob(HASY_ROOT+'*.png'),10000)
-train_paths = np.random.choice(glob(HASY_ROOT+'*.png'),1000)
+valid_paths = np.random.choice(glob(HASY_ROOT+'*.png'),1000)
 
 IMG_MEAN = [0.0, 0.0, 0.0] # [0.485, 0.456, 0.406] # 
 IMG_STD = [1.0, 1.0, 1.0] # [0.229, 0.224, 0.225] # 
@@ -207,12 +207,12 @@ class Encoder(BaseEncoder):
     def __init__(self, model_config, prior_iso=False):
         super(Encoder, self).__init__()
         self.latent_dim = model_config.latent_dim
-        self.shape = 32 # TODO examine this
-
-        self.conv1 = nn.Conv2d(3,32,kernel_size=3,stride=2)
-        self.conv2 = nn.Conv2d(32,64,kernel_size=3,stride=2)
+        self.shape = 5 # TODO examine this
+        self.conv1 = nn.Conv2d( config['channels'],  64, kernel_size=3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d( 64, 128, kernel_size=3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1)
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(64*(self.shape-1)**2,2*self.latent_dim)
+        self.fc1 = nn.Linear(256*(self.shape-1)**2, 2*self.latent_dim)
         self.activation = nn.ReLU()
         self.scale = nn.Parameter(torch.tensor([0.0]))
 
@@ -220,14 +220,17 @@ class Encoder(BaseEncoder):
         #x = self.bn0(x)
         h1 = self.activation(self.conv1(x))
         h2 = self.activation(self.conv2(h1))
-        h3 = self.activation(self.flatten(h2))
-        h4 = self.fc1(h3)
-        mu, logvar = torch.split(h4, self.latent_dim, dim=1)
+        h3 = self.activation(self.conv3(h2))
+        h4 = self.activation(self.flatten(h3))
+        h5 = self.fc1(h4)
+        mu, logvar = torch.split(h5, self.latent_dim, dim=1)
+        #print(h.shape for h in [h1, h2, h3, h4, h5])
+        #assert False
 
         
         return ModelOutput(
             embedding=mu,
-            log_covariance=logvar #torch.log(F.softplus(logvar) + 1e-5), # expects log_covariance
+            log_covariance = torch.log(F.softplus(logvar) + 1e-5), # expects log_covariance # logvar
         )
 
 ### Define paper decoder network
@@ -238,11 +241,11 @@ class Decoder(BaseDecoder):
         self.input_dim = model_config.input_dim
         self.latent_dim = model_config.latent_dim
         self.nc = config['channels']
-        self.shape = 32
-        self.fc2 = nn.Linear(self.latent_dim,(self.shape**2) *32)
-        self.conv3 = nn.ConvTranspose2d(32,64,kernel_size=2,stride=2)
-        self.conv4 = nn.ConvTranspose2d(64,32,kernel_size=2,stride=2)
-        self.conv5 = nn.ConvTranspose2d(32,3,kernel_size=1,stride=1)
+        self.shape = 4
+        self.fc2 = nn.Linear(self.latent_dim,(self.shape**2) *256)
+        self.conv3 = nn.ConvTranspose2d(256, 128, kernel_size=2,stride=2)
+        self.conv4 = nn.ConvTranspose2d(128,  64, kernel_size=2,stride=2)
+        self.conv5 = nn.ConvTranspose2d( 64,   config['channels'], kernel_size=2,stride=2)
 
         self.leakyrelu = nn.LeakyReLU(0.2)
         self.relu = nn.ReLU()
@@ -252,10 +255,11 @@ class Decoder(BaseDecoder):
     def forward(self, z):
         #out = self.dec(z).reshape((z.shape[0],) + self.input_dim)  # reshape data
         h1 = self.activation(self.fc2(z))
-        h1 = h1.view(-1, self.shape, self.shape, self.shape)
+        #h1 = h1.view(-1, self.shape, self.shape-1, self.shape)
+        h1 = h1.view(-1, 256, self.shape, self.shape)
         h2 = self.activation(self.conv3(h1))
         h3 = self.activation(self.conv4(h2))
-        h4 = self.conv5(h3)
+        h4 = self.sigmoid(self.conv5(h3))
         return ModelOutput(
             reconstruction=h4
         )
