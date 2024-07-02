@@ -39,7 +39,7 @@ config = {'lr':1e-3,
           'bs':256,
           'channels':3,
           'img_size':128,
-          'epochs':150,
+          'epochs':50,
           'seed':1000}
 
 IMAGENET_ROOT = '../StandaloneBenchmark/data/TinyImageNet/'
@@ -53,6 +53,8 @@ ANIMAL_FACE_ROOT = '../StandaloneBenchmark/data/afhq/'
 IMAGENET_R_ROOT = '../../Misc/Datasets/imagenet-r/'
 VANGOGH_ROOT = '../../Misc/Datasets/VanGogh/VincentVanGogh/'
 HASY_ROOT = '../../Misc/Datasets/HASY/hasy-data/'
+
+OUTPUT_DIR = './checkpoints/upsample_conv'
 
 def delocalize(filenames):
     f = open(filenames, 'r')
@@ -77,8 +79,8 @@ def celeb_names(split):
 #train_paths = np.random.choice(glob.glob(CIFAR_ROOT + 'train/**/*.png'),10000)
 #valid_paths = np.random.choice(glob.glob(CIFAR_ROOT + 'test/**/*.png'),1000)
 
-train_paths = delocalize(ALTPET_ROOT + 'train_filenames.txt')
-valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
+#train_paths = delocalize(ALTPET_ROOT + 'train_filenames.txt')
+#valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
 
 #train_paths = np.random.choice(celeb_names('train'), 10000)
 #valid_paths = np.random.choice(celeb_names('test'), 1500)
@@ -92,8 +94,8 @@ valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
 #train_paths = np.random.choice(glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),10000)
 #valid_paths = np.random.choice(glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),1000)
 
-#train_paths = np.random.choice(glob.glob(ANIMAL_FACE_ROOT + 'train/*/*.jpg'),10000)
-#valid_paths = np.random.choice(glob.glob(ANIMAL_FACE_ROOT + 'val/*/*.jpg'),1500)
+train_paths = np.random.choice(glob(ANIMAL_FACE_ROOT + 'train/*/*.jpg'),10000)
+valid_paths = np.random.choice(glob(ANIMAL_FACE_ROOT + 'val/*/*.jpg'),1500)
 
 #train_paths = np.random.choice(glob.glob(IMAGENET_R_ROOT + '**/*.jpg'),10000)
 #valid_paths = np.random.choice(glob.glob(IMAGENET_R_ROOT + '**/*.jpg'),1000)
@@ -178,7 +180,7 @@ valid_dataset = ImageNetDataset(valid_paths,augmentations=get_valid_transforms()
 eval_loader = DataLoader(valid_dataset,batch_size=config['bs'],shuffle=False,num_workers=4)
 
 training_config = BaseTrainerConfig(
-    output_dir='./checkpoints/my_plain_vae_model',
+    output_dir=OUTPUT_DIR,
     learning_rate=config['lr'],#5e-4,
     scheduler_cls='CosineAnnealingLR',
     scheduler_params={'T_max': config['epochs']*len(main_loader), 'eta_min':1e-8},
@@ -197,7 +199,7 @@ training_config = BaseTrainerConfig(
 
 model_config = VAEConfig(
     input_dim=(config['channels'], config['img_size'], config['img_size']),
-    latent_dim=512,
+    latent_dim=64,
     reconstruction_loss="nll"
 )
 # Let's define some custom Encoder/Decoder to stick to the paper proposal
@@ -274,6 +276,9 @@ pipeline = TrainingPipeline(
     training_config=training_config,
     model=model
 )
+#TODO remove this
+last_training = sorted(os.listdir(OUTPUT_DIR))[-1]
+trained_model = AutoModel.load_from_folder(os.path.join(OUTPUT_DIR, last_training, 'final_model')).to(device)
 
 # Launch the Pipeline
 pipeline(
@@ -281,9 +286,9 @@ pipeline(
     eval_data=eval_loader
 )
 
-last_training = sorted(os.listdir('./checkpoints/my_plain_vae_model'))[-1]
+last_training = sorted(os.listdir(OUTPUT_DIR))[-1]
 print(last_training)
-trained_model = AutoModel.load_from_folder(os.path.join('./checkpoints/my_plain_vae_model', last_training, 'final_model')).to(device)
+trained_model = AutoModel.load_from_folder(os.path.join(OUTPUT_DIR, last_training, 'final_model')).to(device)
 
 # Generate Data
 # create normal sampler
