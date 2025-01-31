@@ -157,7 +157,7 @@ valid_dataset = ImageNetDataset(valid_paths,augmentations=get_valid_transforms()
 eval_loader = DataLoader(valid_dataset,batch_size=config['bs'],shuffle=False,num_workers=4)
 
 training_config = BaseTrainerConfig(
-    output_dir='./checkpoints/my_plain_vae_model',
+    output_dir='./checkpoints/'+CHECKPOINT_DIR,
     learning_rate=config['lr'],#5e-4,
     scheduler_cls='CosineAnnealingLR',
     scheduler_params={'T_max': config['epochs']*len(main_loader), 'eta_min':1e-8},
@@ -263,9 +263,9 @@ pipeline(
     eval_data=eval_loader
 )
 
-last_training = sorted(os.listdir('./checkpoints/my_plain_vae_model'))[-1]
+last_training = sorted(os.listdir('./checkpoints/'+CHECKPOINT_DIR))[-1]
 print(last_training)
-trained_model = AutoModel.load_from_folder(os.path.join('./checkpoints/my_plain_vae_model', last_training, 'final_model')).to(device)
+trained_model = AutoModel.load_from_folder(os.path.join('./checkpoints/'+CHECKPOINT_DIR, last_training, 'final_model')).to(device)
 
 # Generate Data
 # create normal sampler
