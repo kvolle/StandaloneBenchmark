@@ -53,6 +53,7 @@ ANIMAL_FACE_ROOT = '../StandaloneBenchmark/data/afhq/'
 IMAGENET_R_ROOT = '../../Misc/Datasets/imagenet-r/'
 VANGOGH_ROOT = '../../Misc/Datasets/VanGogh/VincentVanGogh/'
 HASY_ROOT = '../../Misc/Datasets/HASY/hasy-data/'
+PLANE_ROOT = '../../Misc/Datasets/CroppedPlanes/data/'
 
 OUTPUT_DIR = './checkpoints/upsample_conv'
 
@@ -94,8 +95,9 @@ def celeb_names(split):
 #train_paths = np.random.choice(glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),10000)
 #valid_paths = np.random.choice(glob(ITALIAN_ANIMALS_ROOT + '*/*.jpg'),1000)
 
-train_paths = np.random.choice(glob(ANIMAL_FACE_ROOT + 'train/*/*.jpg'),10000)
-valid_paths = np.random.choice(glob(ANIMAL_FACE_ROOT + 'val/*/*.jpg'),1500)
+# TODO this was active
+#train_paths = np.random.choice(glob(ANIMAL_FACE_ROOT + 'train/*/*.jpg'),10000)
+#valid_paths = np.random.choice(glob(ANIMAL_FACE_ROOT + 'val/*/*.jpg'),1500)
 
 #train_paths = np.random.choice(glob.glob(IMAGENET_R_ROOT + '**/*.jpg'),10000)
 #valid_paths = np.random.choice(glob.glob(IMAGENET_R_ROOT + '**/*.jpg'),1000)
@@ -105,6 +107,10 @@ valid_paths = np.random.choice(glob(ANIMAL_FACE_ROOT + 'val/*/*.jpg'),1500)
 
 #train_paths = np.random.choice(glob(HASY_ROOT+'*.png'),10000)
 #valid_paths = np.random.choice(glob(HASY_ROOT+'*.png'),1000)
+
+train_paths = np.random.choice(glob(PLANE_ROOT + 'train/*/*.jpg'),10000)
+valid_paths = np.random.choice(glob(PLANE_ROOT + 'val/*/*.jpg'),1500)
+
 
 IMG_MEAN = [0.485, 0.456, 0.406] # [0.0, 0.0, 0.0] # 
 IMG_STD = [0.229, 0.224, 0.225] # [1.0, 1.0, 1.0] # 
