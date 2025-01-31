@@ -35,12 +35,15 @@ from transformers import get_cosine_schedule_with_warmup
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
+def to_np(a):
+    return a.clone().detach().cpu().numpy()
+
 config = {'lr':1e-3,
           'wd':1e-2,
           'bs':256,
           'channels':3,
           'img_size':128,
-          'epochs':150,
+          'epochs':100,
           'seed':1000}
 
 IMAGENET_ROOT = '../StandaloneBenchmark/data/TinyImageNet/'
