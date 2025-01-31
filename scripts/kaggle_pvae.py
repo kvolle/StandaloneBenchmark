@@ -202,7 +202,7 @@ class Encoder(BaseEncoder):
         h3 = self.activation(self.flatten(h2))
         h4 = self.fc1(h3)
         mu, logvar = torch.split(h4, self.latent_dim, dim=1)
-        mu = self.manifold.expmap0(mu)
+        mu = F.tanh(self.manifold.expmap0(mu)) #TODO Check this
         logvar = torch.log(F.softplus(logvar) + 1e-6)
         
         return ModelOutput(
