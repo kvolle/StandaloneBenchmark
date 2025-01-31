@@ -56,6 +56,9 @@ ITALIAN_ANIMALS_ROOT = '../../Misc/Datasets/Animals-10/raw-img/'
 ANIMAL_FACE_ROOT = '../StandaloneBenchmark/data/afhq/'
 IMAGENET_R_ROOT = '../../Misc/Datasets/imagenet-r/'
 VANGOGH_ROOT = '../../Misc/Datasets/VanGogh/VincentVanGogh/'
+HASY_ROOT = '../../Misc/Datasets/HASY/hasy-data/'
+
+CHECKPOINT_DIR = "my_pvae_model" # 
 
 def delocalize(filenames):
     f = open(filenames, 'r')
@@ -75,12 +78,14 @@ def celeb_names(split):
     return np.asarray(names)
 
 
-train_paths = delocalize(ALTPET_ROOT + 'train_filenames.txt')
-valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
+#train_paths = delocalize(ALTPET_ROOT + 'train_filenames.txt')
+#valid_paths = delocalize(ALTPET_ROOT + 'valid_filenames.txt')
+train_paths = celeb_names("train")
+valid_paths = celeb_names("test")
 
-
-IMG_MEAN = [0.485, 0.456, 0.406] # [0.0, 0.0, 0.0] # 
-IMG_STD = [0.229, 0.224, 0.225] # [1.0, 1.0, 1.0] # 
+#IMG_MEAN = [0.0, 0.0, 0.0] # [0.485, 0.456, 0.406] # 
+IMG_MEAN = [0.5181, 0.41729, 0.36507]
+IMG_STD = [0.5181, 0.58271, 0.63493] #[0.00784, 0.00784, 0.00784] # [0.229, 0.224, 0.225] # 
 
 normalization = {'mean':IMG_MEAN, 'std':IMG_STD}
 
@@ -101,7 +106,7 @@ def get_train_transforms():
             A.CenterCrop(int(np.floor(1.3*config['img_size'])), int(np.floor(1.3*config['img_size'])), always_apply=True),
             A.CoarseDropout(always_apply=False, p=1.0, max_holes=8, max_height=8, max_width=8, min_holes=1, min_height=8, min_width=8, fill_value=(124, 116, 104), mask_fill_value=None),
             A.Resize(config['img_size'],config['img_size'],always_apply=True),
-            A.Normalize(),
+            A.Normalize(IMG_MEAN, IMG_STD),
             A.HorizontalFlip(p=0.5),
             ToTensorV2(p=1.0)
         ])
@@ -110,7 +115,7 @@ def get_valid_transforms():
     return A.Compose(
         [
             A.Resize(config['img_size'],config['img_size'],always_apply=True),
-            A.Normalize(),
+            A.Normalize(IMG_MEAN, IMG_STD),
             ToTensorV2(p=1.0)
         ])
    
@@ -133,11 +138,12 @@ class ImageNetDataset(Dataset):
     def __len__(self):
         return len(self.paths)
         
-test_dataset = ImageNetDataset(valid_paths,augmentations=get_train_transforms())
-test_dl = DataLoader(test_dataset,batch_size=16,shuffle=False,num_workers=4)
+test_dataset = ImageNetDataset(valid_paths,augmentations=get_valid_transforms())
+test_dl = DataLoader(test_dataset,batch_size=16, shuffle=False,num_workers=4)
 
 dataiter = iter(test_dl)
 sample = next(dataiter)
+
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -166,7 +172,7 @@ training_config = BaseTrainerConfig(
 
 model_config = PoincareVAEConfig(
     input_dim=(config['channels'], config['img_size'], config['img_size']),
-    latent_dim=2,#56,
+    latent_dim=64,#56,
     reconstruction_loss="mse",
     prior_distribution='riemannian_normal',
     posterior_distribution='wrapped_normal',
